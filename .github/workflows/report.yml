@@ -3,11 +3,11 @@
 name: Auto-report action
 
 on: 
-  # push:
-  #   branches:
-  #     - master
+  push:
+    branches:
+      - master
   schedule:
-    - cron: '0 6,18 * * *'
+    - cron: '0 8,20 * * *'
 
 jobs:
   build:

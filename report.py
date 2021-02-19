@@ -14,7 +14,7 @@ class Report(object):
         self.stuid = stuid
         self.password = password
         self.data_path = data_path
-
+        self.run_status = "OK"
     def report(self):
         loginsuccess = False
         retrycount = 5
@@ -29,6 +29,7 @@ class Report(object):
                 print("Login Successful!")
                 loginsuccess = True
         if not loginsuccess:
+            self.run_status = "LOGIN FAILED"
             return False
         data = getform.text
         data = data.encode('ascii','ignore').decode('utf-8','ignore')
@@ -54,7 +55,7 @@ class Report(object):
         }
 
         url = "https://weixine.ustc.edu.cn/2020/daliy_report"
-        resp=session.post(url, data=data, headers=headers)
+        session.post(url, data=data, headers=headers)
         data = session.get("https://weixine.ustc.edu.cn/2020").text
         soup = BeautifulSoup(data, 'html.parser')
         pattern = re.compile("202[0-9]-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}")
@@ -72,6 +73,7 @@ class Report(object):
             if delta.seconds < 120:
                 flag = True
         if flag == False:
+            self.run_status = "REPORT FAILED"
             print("Report FAILED!")
         else:
             print("Report SUCCESSFUL!")
@@ -112,4 +114,11 @@ if __name__ == "__main__":
     if count != 0:
         exit(0)
     else:
-        exit(-1)
+        # last run info
+        if(autorepoter.run_status == "LOGIN FAILED"):
+            exit_code = 16
+        elif(autorepoter.run_status == "REPORT FAILED"):
+            exit_code = 32
+        else:
+            exit_code = 64
+        exit(exit_code)
