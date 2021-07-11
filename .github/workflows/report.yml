@@ -7,7 +7,7 @@ on:
     branches:
       - master
   schedule:
-    - cron: '30 7,19 * * *'
+    - cron: '35 7,19 * * *'
 
 jobs:
   build:
