@@ -69,7 +69,10 @@ class Report(object):
             reporttime = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S %z")
             timenow = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
             delta = timenow - reporttime
-            print("{} second(s) before.".format(delta.seconds))
+            if delta.days < 0:
+                delta = reporttime - timenow
+            print("{} second(s) difference.".format(delta.seconds))
+            # print("{} second(s) before.".format(delta.seconds))
             if delta.seconds < 120:
                 flag = True
         if flag == False:
