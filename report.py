@@ -16,7 +16,6 @@ class Report(object):
         self.data_path = data_path
         self.run_status = "OK"
         self.emergency_data = emergency_data.split(",")
-        print(self.emergency_data)
     def report(self):
         loginsuccess = False
         retrycount = 5
@@ -111,12 +110,10 @@ if __name__ == "__main__":
     parser.add_argument('stuid', help='your student number', type=str)
     parser.add_argument('password', help='your CAS password', type=str)
     parser.add_argument('emergency_data', help='emergency data', type=str)
-    # parser.add_argument('e_relationship', help='relationship with emergency contact', type=str)
-    # parser.add_argument('e_mobile', help='mobile no. of emergency contact', type=str)
     
     args = parser.parse_args()
 
-    autorepoter = Report(stuid=args.stuid, password=args.password, data_path=args.data_path, emergency_data=args.emergency_data)# e_contact=args.e_contact, e_relationship=args.e_relationship, e_mobile=args.e_mobile)
+    autorepoter = Report(stuid=args.stuid, password=args.password, data_path=args.data_path, emergency_data=args.emergency_data)
     count = 5
     while count != 0:
         ret = autorepoter.report()
