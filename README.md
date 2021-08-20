@@ -15,6 +15,7 @@
 - 20200831：增强稳定性
 - 20200827：增加打卡失败重试功能，增加License
 - 20200826：为配合学校最新规定，切换至Github Actions实现一天三次打卡
+- 20210820：增加了登录时数字验证码的自动填写功能。
 
 ## 使用方法
 
@@ -51,9 +52,15 @@ pip install -r requirements.txt
 ### 运行打卡程序
 
 ```shell
-python report.py [DATA] [STUID] [PASSWORD]
+python report.py [STUID] [PASSWORD] [EMERGENCY_DATA] [BAIDU_AK] [BAIDU_SK]
 ```
 其中，`[DATA]`是存放打卡数据的json文件的路径，`[STUID]`是学号，`[PASSWORD]`是统一身份认证的密码明文。
+
+`[EMERGENCY_DATA]`为紧急联系人的信息，格式为`联系人姓名,联系人与本人的关系,联系人手机号`（英文逗号分隔）。
+
+`[BAIDU_AK]`, `[BAIDU_SK]`两项为[百度OCR](https://ai.baidu.com/tech/ocr)的API Key和Secret Key。数字识别API注册后可免费使用一定额度。
+
+这些参数都要保存在github的secret中。
 
 ## data.json 数据获取方法
 
