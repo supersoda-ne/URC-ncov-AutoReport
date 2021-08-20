@@ -137,7 +137,7 @@ if __name__ == "__main__":
 
     autorepoter = Report(stuid=args.stuid, password=args.password, data_path=args.data_path, emergency_data=args.emergency_data,\
         baidu_ak=args.baidu_ak, baidu_sk=args.baidu_sk)
-    LOGIN_TIMES = 1
+    LOGIN_TIMES = 2
     REPORT_TIMES = 5
     loginsuccess = False
     count = LOGIN_TIMES
