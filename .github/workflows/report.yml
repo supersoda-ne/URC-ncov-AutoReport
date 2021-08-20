@@ -22,7 +22,6 @@ jobs:
         python-version: 3.8
     - name: Install dependencies
       run: |
-        apt-get install tesseract-ocr
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Run report script
@@ -30,5 +29,7 @@ jobs:
         STUID: ${{ secrets.Stuid }}
         PASSWORD: ${{ secrets.Password }}
         EMERGENCY_DATA: ${{ secrets.Emergency_Data }}
+        BAIDU_AK: ${{ secrets.Baidu_AK}}
+        BAIDU_SK: ${{ secrets.Baidu_SK}}
       run: |
-        python report.py data.json "$STUID" "$PASSWORD" "$EMERGENCY_DATA"
+        python report.py data.json "$STUID" "$PASSWORD" "$EMERGENCY_DATA" "$BAIDU_AK" "$BAIDU_SK"

@@ -15,28 +15,16 @@ import cv2
 import re
 import base64
 class Report(object):
-    def __init__(self, stuid, password, data_path, emergency_data):
+    def __init__(self, stuid, password, data_path, emergency_data, baidu_ak, baidu_sk):
         self.stuid = stuid
         self.password = password
         self.data_path = data_path
         self.run_status = "OK"
         self.emergency_data = emergency_data.split(",")
-    def report(self):
-        loginsuccess = False
-        retrycount = 1
-        while (not loginsuccess) and retrycount:
-            session = self.login()
-            cookies = session.cookies
-            getform = session.get("https://weixine.ustc.edu.cn/2020")
-            retrycount = retrycount - 1
-            if getform.url != "https://weixine.ustc.edu.cn/2020/home":
-                print("Login Failed! Retrying...")
-            else:
-                print("Login Successful!")
-                loginsuccess = True
-        if not loginsuccess:
-            self.run_status = "LOGIN FAILED"
-            return False
+        self.baidu_ak = baidu_ak
+        self.baidu_sk = baidu_sk
+    def report(self, session, getform):
+        cookies = session.cookies
         data = getform.text
         data = data.encode('ascii','ignore').decode('utf-8','ignore')
         soup = BeautifulSoup(data, 'html.parser')
@@ -119,22 +107,45 @@ class Report(object):
         print("login...")
         return session
     def get_vcode(self, session):
+        
+        host = 'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=' + self.baidu_ak + '&client_secret=' + self.baidu_sk
+        response = requests.get(host)
+        access_token = response.json()['access_token']
+        print(access_token)
+        
         response = session.get("https://passport.ustc.edu.cn/validatecode.jsp?type=login")
         image = response.content
-        with open("img.png", "wb") as f:
-            f.write(response.content)
-        image=cv2.imread('img.png')
-        # text = recognize_text(image)
-        kernel = np.ones((3,3),np.uint8)
-        image = cv2.dilate(image,kernel,iterations = 1)
-        image = Image.fromarray(image)
-        image.show()
-        text = pytesseract.image_to_string(image)
-        print("'" + text + "'")
-        vcode = re.findall("\d+", text)[0][0:4]
-        print("'" + vcode + "'")
-        # print(response.content)
+        # with open("img.png", "wb") as f:
+        #     f.write(response.content)
+
+
+        request_url = "https://aip.baidubce.com/rest/2.0/ocr/v1/numbers"
+        # 二进制方式打开图片文件
+        # f = open('img.png', 'rb')
+        img = base64.b64encode(image)
+
+        params = {"image":img}
+        # access_token = '[调用鉴权接口获取的token]'
+        request_url = request_url + "?access_token=" + access_token
+        headers = {'content-type': 'application/x-www-form-urlencoded'}
+        response = requests.post(request_url, data=params, headers=headers)
+        if response:
+            print (response.json())
+        vcode = response.json()['words_result'][0]['words']
+        print(vcode)
+        # image=cv2.imread('img.png')
+        # # text = recognize_text(image)
+        # kernel = np.ones((3,3),np.uint8)
+        # image = cv2.dilate(image,kernel,iterations = 1)
+        # image = Image.fromarray(image)
+        # image.show()
+        # text = pytesseract.image_to_string(image)
+        # print("'" + text + "'")
+        # vcode = re.findall("\d+", text)[0][0:4]
+        # print("'" + vcode + "'")
+        # # print(response.content)
         return vcode
+    
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='URC nCov auto report script.')
@@ -142,13 +153,31 @@ if __name__ == "__main__":
     parser.add_argument('stuid', help='your student number', type=str)
     parser.add_argument('password', help='your CAS password', type=str)
     parser.add_argument('emergency_data', help='emergency data', type=str)
+    parser.add_argument('baidu_ak', help='baidu api key', type=str)
+    parser.add_argument('baidu_sk', help='baidu api secret key', type=str)
     
     args = parser.parse_args()
 
-    autorepoter = Report(stuid=args.stuid, password=args.password, data_path=args.data_path, emergency_data=args.emergency_data)
-    count = 1
+    autorepoter = Report(stuid=args.stuid, password=args.password, data_path=args.data_path, emergency_data=args.emergency_data,\
+        baidu_ak=args.baidu_ak, baidu_sk=args.baidu_sk)
+    LOGIN_TIMES = 1
+    REPORT_TIMES = 5
+    loginsuccess = False
+    count = LOGIN_TIMES
     while count != 0:
-        ret = autorepoter.report()
+        session = autorepoter.login()
+        getform = session.get("https://weixine.ustc.edu.cn/2020")
+        if getform.url == "https://weixine.ustc.edu.cn/2020/home":
+            loginsuccess = True
+            break
+        print("Login Failed, retry...")
+        count = count - 1
+    if loginsuccess:
+        count = REPORT_TIMES
+    else:
+        print("Login Failed " + str(LOGIN_TIMES) + " times")
+    while count != 0:
+        ret = autorepoter.report(session, getform)
         if ret != False:
             break
         print("Report Failed, retry...")
@@ -157,7 +186,7 @@ if __name__ == "__main__":
         exit(0)
     else:
         # last run info
-        if(autorepoter.run_status == "LOGIN FAILED"):
+        if(not loginsuccess):
             exit_code = 16
         elif(autorepoter.run_status == "REPORT FAILED"):
             exit_code = 32
