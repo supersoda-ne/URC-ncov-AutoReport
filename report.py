@@ -8,10 +8,6 @@ import re
 import sys
 import argparse
 from bs4 import BeautifulSoup
-import pytesseract
-from PIL import Image, ImageDraw
-import numpy as np
-import cv2
 import re
 import base64
 class Report(object):
@@ -110,14 +106,9 @@ class Report(object):
         
         host = 'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=' + self.baidu_ak + '&client_secret=' + self.baidu_sk
         response = requests.get(host)
-        access_token = response.json()['access_token']
-        print(access_token)
-        
+        access_token = response.json()['access_token']        
         response = session.get("https://passport.ustc.edu.cn/validatecode.jsp?type=login")
         image = response.content
-        # with open("img.png", "wb") as f:
-        #     f.write(response.content)
-
 
         request_url = "https://aip.baidubce.com/rest/2.0/ocr/v1/numbers"
         # 二进制方式打开图片文件
@@ -129,21 +120,7 @@ class Report(object):
         request_url = request_url + "?access_token=" + access_token
         headers = {'content-type': 'application/x-www-form-urlencoded'}
         response = requests.post(request_url, data=params, headers=headers)
-        if response:
-            print (response.json())
         vcode = response.json()['words_result'][0]['words']
-        print(vcode)
-        # image=cv2.imread('img.png')
-        # # text = recognize_text(image)
-        # kernel = np.ones((3,3),np.uint8)
-        # image = cv2.dilate(image,kernel,iterations = 1)
-        # image = Image.fromarray(image)
-        # image.show()
-        # text = pytesseract.image_to_string(image)
-        # print("'" + text + "'")
-        # vcode = re.findall("\d+", text)[0][0:4]
-        # print("'" + vcode + "'")
-        # # print(response.content)
         return vcode
     
 
