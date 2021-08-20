@@ -8,7 +8,12 @@ import re
 import sys
 import argparse
 from bs4 import BeautifulSoup
-
+import pytesseract
+from PIL import Image, ImageDraw
+import numpy as np
+import cv2
+import re
+import base64
 class Report(object):
     def __init__(self, stuid, password, data_path, emergency_data):
         self.stuid = stuid
@@ -18,7 +23,7 @@ class Report(object):
         self.emergency_data = emergency_data.split(",")
     def report(self):
         loginsuccess = False
-        retrycount = 5
+        retrycount = 1
         while (not loginsuccess) and retrycount:
             session = self.login()
             cookies = session.cookies
@@ -88,21 +93,48 @@ class Report(object):
 
     def login(self):
         url = "https://passport.ustc.edu.cn/login?service=http%3A%2F%2Fweixine.ustc.edu.cn%2F2020%2Fcaslogin"
+        session = requests.Session()
+
+        # get CAS_LT
+        response = session.get(url)
+        response = BeautifulSoup(response.content, 'html.parser')
+        login_form = response.find_all(class_='loginForm form-style')[0]
+        CAS_LT = login_form.find_next(id='CAS_LT')['value']
+        # get validate code
+        vcode = self.get_vcode(session)
         data = {
             'model': 'uplogin.jsp',
             'service': 'https://weixine.ustc.edu.cn/2020/caslogin',
             'username': self.stuid,
             'password': str(self.password),
             'warn': '',
-            'showCode': '',
+            'showCode': '1',
+            'CAS_LT': CAS_LT,
+            'LT': vcode,
             'button': '',
         }
-        session = requests.Session()
+
         session.post(url, data=data)
 
         print("login...")
         return session
-
+    def get_vcode(self, session):
+        response = session.get("https://passport.ustc.edu.cn/validatecode.jsp?type=login")
+        image = response.content
+        with open("img.png", "wb") as f:
+            f.write(response.content)
+        image=cv2.imread('img.png')
+        # text = recognize_text(image)
+        kernel = np.ones((3,3),np.uint8)
+        image = cv2.dilate(image,kernel,iterations = 1)
+        image = Image.fromarray(image)
+        image.show()
+        text = pytesseract.image_to_string(image)
+        print("'" + text + "'")
+        vcode = re.findall("\d+", text)[0][0:4]
+        print("'" + vcode + "'")
+        # print(response.content)
+        return vcode
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='URC nCov auto report script.')
@@ -114,7 +146,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     autorepoter = Report(stuid=args.stuid, password=args.password, data_path=args.data_path, emergency_data=args.emergency_data)
-    count = 5
+    count = 1
     while count != 0:
         ret = autorepoter.report()
         if ret != False:
