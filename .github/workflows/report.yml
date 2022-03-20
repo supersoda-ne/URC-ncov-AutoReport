@@ -32,4 +32,4 @@ jobs:
         BAIDU_AK: ${{ secrets.Baidu_AK}}
         BAIDU_SK: ${{ secrets.Baidu_SK}}
       run: |
-        python report.py data.json "$STUID" "$PASSWORD" "$EMERGENCY_DATA" "$BAIDU_AK" "$BAIDU_SK"
+        python report.py data.json application.json "$STUID" "$PASSWORD" "$EMERGENCY_DATA" "$BAIDU_AK" "$BAIDU_SK"
