@@ -11,10 +11,11 @@ from bs4 import BeautifulSoup
 import re
 import base64
 class Report(object):
-    def __init__(self, stuid, password, data_path, emergency_data, baidu_ak, baidu_sk):
+    def __init__(self, stuid, password, report_data_path, apply_data_path, emergency_data, baidu_ak, baidu_sk):
         self.stuid = stuid
         self.password = password
-        self.data_path = data_path
+        self.report_data_path = report_data_path
+        self.apply_data_path = apply_data_path
         self.run_status = "OK"
         self.emergency_data = emergency_data.split(",")
         self.baidu_ak = baidu_ak
@@ -26,7 +27,7 @@ class Report(object):
         soup = BeautifulSoup(data, 'html.parser')
         token = soup.find("input", {"name": "_token"})['value']
 
-        with open(self.data_path, "r+") as f:
+        with open(self.report_data_path, "r+", encoding="utf-8") as f:
             data = f.read()
             data = json.loads(data)
             data["_token"]=token
@@ -103,7 +104,7 @@ class Report(object):
         print("login...")
         return session
     def get_vcode(self, session):
-        
+        print(self.baidu_ak, self.baidu_sk)
         host = 'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=' + self.baidu_ak + '&client_secret=' + self.baidu_sk
         response = requests.get(host)
         access_token = response.json()['access_token']        
@@ -122,11 +123,59 @@ class Report(object):
         response = requests.post(request_url, data=params, headers=headers)
         vcode = response.json()['words_result'][0]['words']
         return vcode
-    
+    def apply(self, session, getform):
+        cookies = session.cookies
+        data = getform.text
+        data = data.encode('ascii','ignore').decode('utf-8','ignore')
+        soup = BeautifulSoup(data, 'html.parser')
+        token = soup.find("input", {"name": "_token"})['value']
+        now = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
+        start_date = now + datetime.timedelta(minutes = -5)
+        start_date_str = datetime.datetime.strftime(start_date, "%Y-%m-%d %H:%M:%S")
+        end_date = now + datetime.timedelta(days = 1)
+        end_date_str = datetime.datetime.strftime(end_date, "%Y-%m-%d ") + "23:59:59"
+        with open(self.apply_data_path, "r+", encoding="utf-8") as f:
+            data = f.read()
+            data = json.loads(data)
+            data["_token"]=token
+            data["start_date"] = start_date_str
+            data["end_date"] = end_date_str
+
+        headers = {
+            'authority': 'weixine.ustc.edu.cn',
+            'origin': 'https://weixine.ustc.edu.cn',
+            'upgrade-insecure-requests': '1',
+            'content-type': 'application/x-www-form-urlencoded',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.100 Safari/537.36',
+            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+            'referer': 'https://weixine.ustc.edu.cn/2020/apply/daliy/i?t=23',
+            'accept-language': 'zh-CN,zh;q=0.9',
+            'Connection': 'close',
+            'cookie': "PHPSESSID=" + cookies.get("PHPSESSID") + ";XSRF-TOKEN=" + cookies.get("XSRF-TOKEN") + ";laravel_session="+cookies.get("laravel_session"),
+        }
+
+        url = "https://weixine.ustc.edu.cn/2020/apply/daliy/post"
+        session.post(url, data=data, headers=headers)
+        data = session.get("https://weixine.ustc.edu.cn/2020/apply_total").text
+
+        pattern = re.compile(datetime.datetime.strftime(end_date, "%Y-%m-%d"))
+
+        soup = BeautifulSoup(data, 'html.parser')
+        if len(soup.find_all(string=pattern)) > 0:
+            flag = True
+        else:
+            flag = False
+        if flag == False:
+            self.run_status = "APPLY FAILED"
+            print("APPLY FAILED!")
+        else:
+            print("APPLY SUCCESSFUL!")
+        return flag
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='URC nCov auto report script.')
-    parser.add_argument('data_path', help='path to your own data used for post method', type=str)
+    parser.add_argument('report_data_path', help='path to your own data used for post method', type=str)
+    parser.add_argument('apply_data_path', help='path to your own data used for post method', type=str)
     parser.add_argument('stuid', help='your student number', type=str)
     parser.add_argument('password', help='your CAS password', type=str)
     parser.add_argument('emergency_data', help='emergency data', type=str)
@@ -135,16 +184,19 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
 
-    autorepoter = Report(stuid=args.stuid, password=args.password, data_path=args.data_path, emergency_data=args.emergency_data,\
-        baidu_ak=args.baidu_ak, baidu_sk=args.baidu_sk)
+    autorepoter = Report(stuid=args.stuid, password=args.password, report_data_path=args.report_data_path, apply_data_path=args.apply_data_path,\
+                    emergency_data=args.emergency_data, baidu_ak=args.baidu_ak, baidu_sk=args.baidu_sk)
     LOGIN_TIMES = 2
     REPORT_TIMES = 5
+    APPLY_TIMES = 5
     loginsuccess = False
     count = LOGIN_TIMES
     while count != 0:
         session = autorepoter.login()
-        getform = session.get("https://weixine.ustc.edu.cn/2020")
-        if getform.url == "https://weixine.ustc.edu.cn/2020/home":
+        getform_report = session.get("https://weixine.ustc.edu.cn/2020")
+        getform_apply = session.get("https://weixine.ustc.edu.cn/2020/apply/daliy/i?t=23")
+
+        if getform_report.url == "https://weixine.ustc.edu.cn/2020/home":
             loginsuccess = True
             break
         print("Login Failed, retry...")
@@ -153,20 +205,32 @@ if __name__ == "__main__":
         count = REPORT_TIMES
     else:
         print("Login Failed " + str(LOGIN_TIMES) + " times")
+    reportsuccess = False
     while count != 0:
-        ret = autorepoter.report(session, getform)
-        if ret != False:
+        reportsuccess = autorepoter.report(session, getform_report)
+        if reportsuccess != False:
             break
         print("Report Failed, retry...")
         count = count - 1
-    if count != 0:
+    if reportsuccess:
+        count = APPLY_TIMES
+    applysuccess = False
+    while count != 0:
+        applysuccess = autorepoter.apply(session, getform_apply)
+        if applysuccess != False:
+            break
+        print("Apply Failed, retry...")
+        count = count - 1
+    if applysuccess:
         exit(0)
+    
+    # last run info
+    if(not loginsuccess):
+        exit_code = 16
+    elif(autorepoter.run_status == "REPORT FAILED"):
+        exit_code = 32
+    elif(autorepoter.run_status == "APPLY FAILED"):
+        exit_code = 64
     else:
-        # last run info
-        if(not loginsuccess):
-            exit_code = 16
-        elif(autorepoter.run_status == "REPORT FAILED"):
-            exit_code = 32
-        else:
-            exit_code = 64
-        exit(exit_code)
+        exit_code = 128
+    exit(exit_code)
