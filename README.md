@@ -52,7 +52,7 @@ pip install -r requirements.txt
 ### 运行打卡程序
 
 ```shell
-python report.py [STUID] [PASSWORD] [EMERGENCY_DATA] [BAIDU_AK] [BAIDU_SK]
+python report.py data.json application.json [STUID] [PASSWORD] [EMERGENCY_DATA] [BAIDU_AK] [BAIDU_SK]
 ```
 其中，`[DATA]`是存放打卡数据的json文件的路径，`[STUID]`是学号，`[PASSWORD]`是统一身份认证的密码明文。
 
