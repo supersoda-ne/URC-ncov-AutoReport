@@ -132,7 +132,7 @@ class Report(object):
         now = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
         start_date = now + datetime.timedelta(minutes = -5)
         start_date_str = datetime.datetime.strftime(start_date, "%Y-%m-%d %H:%M:%S")
-        end_date = now + datetime.timedelta(days = 1)
+        end_date = now
         end_date_str = datetime.datetime.strftime(end_date, "%Y-%m-%d ") + "23:59:59"
         with open(self.apply_data_path, "r+", encoding="utf-8") as f:
             data = f.read()
