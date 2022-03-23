@@ -1,8 +1,4 @@
 {
-"return_college[]": "东校区",
-"return_college[]": "西校区",
-"return_college[]": "南校区",
-"return_college[]": "北校区",
-"return_college[]": "中校区",
+"return_college[]": ["东校区", "西校区", "南校区", "北校区", "中校区"],
 "t": "3"
 }

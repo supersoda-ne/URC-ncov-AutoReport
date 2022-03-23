@@ -137,7 +137,7 @@ class Report(object):
         with open(self.apply_data_path, "r+", encoding="utf-8") as f:
             data = f.read()
             data = json.loads(data)
-            data["_token"]=token
+            data["_token"] = token
             data["start_date"] = start_date_str
             data["end_date"] = end_date_str
 
@@ -171,6 +171,7 @@ class Report(object):
         else:
             print("APPLY SUCCESSFUL!")
         return flag
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='URC nCov auto report script.')
