@@ -194,7 +194,7 @@ if __name__ == "__main__":
     while count != 0:
         session = autorepoter.login()
         getform_report = session.get("https://weixine.ustc.edu.cn/2020")
-        getform_apply = session.get("https://weixine.ustc.edu.cn/2020/apply/daliy/i?t=23")
+        getform_apply = session.get("https://weixine.ustc.edu.cn/2020/apply/daliy/i?t=3")
 
         if getform_report.url == "https://weixine.ustc.edu.cn/2020/home":
             loginsuccess = True
