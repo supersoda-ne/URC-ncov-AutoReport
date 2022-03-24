@@ -158,7 +158,7 @@ class Report(object):
         session.post(url, data=data, headers=headers)
         data = session.get("https://weixine.ustc.edu.cn/2020/apply_total").text
 
-        pattern = re.compile(datetime.datetime.strftime(end_date, "%Y-%m-%d"))
+        pattern = re.compile(end_date_str)
 
         soup = BeautifulSoup(data, 'html.parser')
         if len(soup.find_all(string=pattern)) > 0:
