@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 import re
 import base64
 class Report(object):
-    def __init__(self, stuid, password, report_data_path, apply_data_path, emergency_data, baidu_ak, baidu_sk):
+    def __init__(self, stuid, password, report_data_path, apply_data_path, emergency_data, baidu_ak, baidu_sk, dormitory_data):
         self.stuid = stuid
         self.password = password
         self.report_data_path = report_data_path
@@ -20,6 +20,7 @@ class Report(object):
         self.emergency_data = emergency_data.split(",")
         self.baidu_ak = baidu_ak
         self.baidu_sk = baidu_sk
+        self.dormitory_data = dormitory_data.split(",")
     def report(self, session, getform):
         cookies = session.cookies
         data = getform.text
@@ -34,6 +35,9 @@ class Report(object):
             data["jinji_lxr"] = self.emergency_data[0]
             data["jinji_guanxi"] = self.emergency_data[1]
             data["jiji_mobile"] = self.emergency_data[2]
+            data["juzhudi"] = self.dormitory_data[0]
+            data["dorm_building"] = self.dormitory_data[1]
+            data["dorm"] = self.dormitory_data[2]
 
         headers = {
             'authority': 'weixine.ustc.edu.cn',
@@ -182,11 +186,12 @@ if __name__ == "__main__":
     parser.add_argument('emergency_data', help='emergency data', type=str)
     parser.add_argument('baidu_ak', help='baidu api key', type=str)
     parser.add_argument('baidu_sk', help='baidu api secret key', type=str)
-    
+    parser.add_argument('dormitory_data', help='dormitory data, "campus,building_no,room_no"', type=str)
+
     args = parser.parse_args()
 
     autorepoter = Report(stuid=args.stuid, password=args.password, report_data_path=args.report_data_path, apply_data_path=args.apply_data_path,\
-                    emergency_data=args.emergency_data, baidu_ak=args.baidu_ak, baidu_sk=args.baidu_sk)
+                    emergency_data=args.emergency_data, baidu_ak=args.baidu_ak, baidu_sk=args.baidu_sk, dormitory_data=args.dormitory_data)
     LOGIN_TIMES = 2
     REPORT_TIMES = 5
     APPLY_TIMES = 5
