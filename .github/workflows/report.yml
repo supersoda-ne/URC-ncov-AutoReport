@@ -31,5 +31,6 @@ jobs:
         EMERGENCY_DATA: ${{ secrets.Emergency_Data }}
         BAIDU_AK: ${{ secrets.Baidu_AK}}
         BAIDU_SK: ${{ secrets.Baidu_SK}}
+        DORMITORY_DATA": ${{ secrets.DORMITORY_DATA" }}
       run: |
         python report.py data.json application.json "$STUID" "$PASSWORD" "$EMERGENCY_DATA" "$BAIDU_AK" "$BAIDU_SK" "DORMITORY_DATA"
