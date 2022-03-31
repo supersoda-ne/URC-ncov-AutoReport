@@ -200,7 +200,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     print(len(args.dormitory_data))
-    print(len(os.getenv(DORMITORY_DATA) ))
+    print(len(os.getenv("DORMITORY_DATA") ))
     autorepoter = Report(stuid=args.stuid, password=args.password, report_data_path=args.report_data_path, apply_data_path=args.apply_data_path,\
                     emergency_data=args.emergency_data, baidu_ak=args.baidu_ak, baidu_sk=args.baidu_sk, dormitory_data=args.dormitory_data)
     LOGIN_TIMES = 2
