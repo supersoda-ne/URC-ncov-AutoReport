@@ -22,9 +22,13 @@ class Report(object):
         self.baidu_sk = baidu_sk
         self.dormitory_data = dormitory_data.split(",")
         if len(self.dormitory_data) < 3:
+            print("dorm_data")
+            print(dormitory_data)
             for d in self.dormitory_data:
-                print(len(d))
+                print(d)
             exit(10)
+        else:
+            exit(0)
     def report(self, session, getform):
         cookies = session.cookies
         data = getform.text
