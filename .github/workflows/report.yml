@@ -33,5 +33,5 @@ jobs:
         BAIDU_SK: ${{ secrets.Baidu_SK}}
         DORMITORY_DATA": ${{ secrets.DORMITORY_DATA }}
       run: |
-        expr length $DORMITORY_DATA
+        echo ${#DORMITORY_DATA}
         python report.py data.json application.json "$STUID" "$PASSWORD" "$EMERGENCY_DATA" "$BAIDU_AK" "$BAIDU_SK" "$DORMITORY_DATA"
