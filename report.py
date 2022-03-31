@@ -23,6 +23,7 @@ class Report(object):
         self.dormitory_data = dormitory_data.split(",")
         if len(self.dormitory_data) < 3:
             print("dorm_data")
+            print(len(dormitory_data))
             print(dormitory_data)
             for d in self.dormitory_data:
                 print(d)
