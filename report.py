@@ -22,15 +22,6 @@ class Report(object):
         self.baidu_ak = baidu_ak
         self.baidu_sk = baidu_sk
         self.dormitory_data = dormitory_data.split(",")
-        if len(self.dormitory_data) < 3:
-            print("dorm_data")
-            print(len(dormitory_data))
-            print(dormitory_data)
-            for d in self.dormitory_data:
-                print(d)
-            exit(10)
-        else:
-            exit(0)
     def report(self, session, getform):
         cookies = session.cookies
         data = getform.text
@@ -199,8 +190,6 @@ if __name__ == "__main__":
     parser.add_argument('dormitory_data', help='dormitory data, "campus,building_no,room_no"', type=str)
 
     args = parser.parse_args()
-    print(len(args.dormitory_data))
-    print(len(os.getenv("DORMITORY_DATA") ))
     autorepoter = Report(stuid=args.stuid, password=args.password, report_data_path=args.report_data_path, apply_data_path=args.apply_data_path,\
                     emergency_data=args.emergency_data, baidu_ak=args.baidu_ak, baidu_sk=args.baidu_sk, dormitory_data=args.dormitory_data)
     LOGIN_TIMES = 2
