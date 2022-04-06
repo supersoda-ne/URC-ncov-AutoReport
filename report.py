@@ -54,32 +54,36 @@ class Report(object):
         }
 
         url = "https://weixine.ustc.edu.cn/2020/daliy_report"
-        session.post(url, data=data, headers=headers)
-        data = session.get("https://weixine.ustc.edu.cn/2020").text
-        soup = BeautifulSoup(data, 'html.parser')
-        pattern = re.compile("202[0-9]-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}")
-        token = soup.find(
-            "span", {"style": "position: relative; top: 5px; color: #666;"})
-        flag = False
-        if pattern.search(token.text) is not None:
-            date = pattern.search(token.text).group()
-            print("Latest report: " + date)
-            date = date + " +0800"
-            reporttime = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S %z")
-            timenow = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
-            delta = timenow - reporttime
-            if delta.days < 0:
-                delta = reporttime - timenow
-            print("{} second(s) difference.".format(delta.seconds))
-            # print("{} second(s) before.".format(delta.seconds))
-            if delta.seconds < 120:
-                flag = True
-        if flag == False:
+        res = session.post(url, data=data, headers=headers)
+
+
+
+        # data = session.get("https://weixine.ustc.edu.cn/2020").text
+        # soup = BeautifulSoup(data, 'html.parser')
+        # pattern = re.compile("202[0-9]-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}")
+        # token = soup.find(
+        #     "span", {"style": "position: relative; top: 5px; color: #666;"})
+        # flag = False
+        # if pattern.search(token.text) is not None:
+        #     date = pattern.search(token.text).group()
+        #     print("Latest report: " + date)
+        #     date = date + " +0800"
+        #     reporttime = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S %z")
+        #     timenow = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
+        #     delta = timenow - reporttime
+        #     if delta.days < 0:
+        #         delta = reporttime - timenow
+        #     print("{} second(s) difference.".format(delta.seconds))
+        #     # print("{} second(s) before.".format(delta.seconds))
+        #     if delta.seconds < 120:
+        #         flag = True
+        if res.status_code != 200:
             self.run_status = "REPORT FAILED"
             print("Report FAILED!")
+            return False
         else:
             print("Report SUCCESSFUL!")
-        return flag
+            return True
 
     def login(self):
         url = "https://passport.ustc.edu.cn/login?service=http%3A%2F%2Fweixine.ustc.edu.cn%2F2020%2Fcaslogin"
