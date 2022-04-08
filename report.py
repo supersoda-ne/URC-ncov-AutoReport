@@ -139,9 +139,12 @@ class Report(object):
         soup = BeautifulSoup(data, 'html.parser')
         token = soup.find("input", {"name": "_token"})['value']
         now = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
-        start_date = now + datetime.timedelta(days = 1)
+        delta_days = 0
+        if now.hour >= 20:
+            delta_days = 1
+        start_date = now + datetime.timedelta(days = delta_days)
         start_date_str = datetime.datetime.strftime(start_date, "%Y-%m-%d ") + "00:00:01"
-        end_date = now + datetime.timedelta(days = 1)
+        end_date = now + datetime.timedelta(days = delta_days)
         end_date_str = datetime.datetime.strftime(end_date, "%Y-%m-%d ") + "23:59:59"
         with open(self.apply_data_path, "r+", encoding="utf-8") as f:
             data = f.read()
