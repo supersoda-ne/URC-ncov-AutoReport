@@ -166,7 +166,7 @@ class Report(object):
             'cookie': "PHPSESSID=" + cookies.get("PHPSESSID") + ";XSRF-TOKEN=" + cookies.get("XSRF-TOKEN") + ";laravel_session="+cookies.get("laravel_session"),
         }
 
-        url = "https://weixine.ustc.edu.cn/2020/apply/daliy/post"
+        url = "https://weixine.ustc.edu.cn/2020/apply/daliy/ipost"
         session.post(url, data=data, headers=headers)
         data = session.get("https://weixine.ustc.edu.cn/2020/apply_total").text
 
