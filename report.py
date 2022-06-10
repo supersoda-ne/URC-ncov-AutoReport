@@ -130,7 +130,7 @@ class Report(object):
         request_url = request_url + "?access_token=" + access_token
         headers = {'content-type': 'application/x-www-form-urlencoded'}
         response = requests.post(request_url, data=params, headers=headers)
-        print(response.json())
+        # print(response.json())
         vcode = response.json()['words_result'][0]['words']
         return vcode
     def apply(self, session, getform):
