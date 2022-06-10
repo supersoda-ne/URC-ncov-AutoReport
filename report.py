@@ -113,7 +113,7 @@ class Report(object):
         print("login...")
         return session
     def get_vcode(self, session):
-        print(self.baidu_ak, self.baidu_sk)
+        # print(self.baidu_ak, self.baidu_sk)
         host = 'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=' + self.baidu_ak + '&client_secret=' + self.baidu_sk
         response = requests.get(host)
         access_token = response.json()['access_token']        
@@ -130,6 +130,7 @@ class Report(object):
         request_url = request_url + "?access_token=" + access_token
         headers = {'content-type': 'application/x-www-form-urlencoded'}
         response = requests.post(request_url, data=params, headers=headers)
+        print(response.json())
         vcode = response.json()['words_result'][0]['words']
         return vcode
     def apply(self, session, getform):
@@ -226,16 +227,17 @@ if __name__ == "__main__":
         print("Report Failed, retry...")
         count = count - 1
     if reportsuccess:
-        count = APPLY_TIMES
-    applysuccess = False
-    while count != 0:
-        applysuccess = autorepoter.apply(session, getform_apply)
-        if applysuccess != False:
-            break
-        print("Apply Failed, retry...")
-        count = count - 1
-    if applysuccess:
         exit(0)
+        count = APPLY_TIMES
+    # applysuccess = False
+    # while count != 0:
+    #     applysuccess = autorepoter.apply(session, getform_apply)
+    #     if applysuccess != False:
+    #         break
+    #     print("Apply Failed, retry...")
+    #     count = count - 1
+    # if applysuccess:
+    #     exit(0)
     
     # last run info
     if(not loginsuccess):
