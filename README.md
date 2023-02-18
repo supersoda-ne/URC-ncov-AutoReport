@@ -53,13 +53,15 @@ pip install -r requirements.txt
 ### 运行打卡程序
 
 ```shell
-python report.py data.json application.json [STUID] [PASSWORD] [EMERGENCY_DATA] [BAIDU_AK] [BAIDU_SK]
+python report.py data.json application.json [STUID] [PASSWORD] [EMERGENCY_DATA] [BAIDU_AK] [BAIDU_SK] [DORMITORY_DATA]
 ```
 其中，`[DATA]`是存放打卡数据的json文件的路径，`[STUID]`是学号，`[PASSWORD]`是统一身份认证的密码明文。
 
 `[EMERGENCY_DATA]`为紧急联系人的信息，格式为`联系人姓名,联系人与本人的关系,联系人手机号`（英文逗号分隔）。
 
 `[BAIDU_AK]`, `[BAIDU_SK]`两项为[百度OCR](https://ai.baidu.com/tech/ocr)的API Key和Secret Key。数字识别API注册后可免费使用一定额度。
+
+`[DORMITORY_DATA]`为宿舍信息，格式为`校区,楼号,房间号`（英文逗号分隔）。
 
 这些参数都要保存在github的secret中。
 
